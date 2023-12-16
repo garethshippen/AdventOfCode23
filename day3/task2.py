@@ -11,9 +11,6 @@ with open(filename) as inp:
         winning_nums.append(line[a:b])
         play_nums.append(line[c:d])
 
-#print(winning_nums[11])
-#print(play_nums[11])
-
 for i in range(len(winning_nums)):
     temp_win = winning_nums[i].split(" ")
     temp_play = play_nums[i].split(" ")
@@ -22,16 +19,15 @@ for i in range(len(winning_nums)):
     winning_nums[i] = temp_win
     play_nums[i] = temp_play
 
-#print(winning_nums[11])
-#print(play_nums[11])
-
-total = 0
+matches = []
 
 for i in range(len(winning_nums)):
     win = set(winning_nums[i])
     play = set(play_nums[i])
     common = win.intersection(play)
     if len(common) > 0:
-        total += 2 ** (len(common) - 1)
+        matches.append(len(common))
+    else:
+        matches.append(0)
     
-print(total)
+print(matches)

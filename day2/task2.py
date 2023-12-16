@@ -1,4 +1,4 @@
-file_input = "input.txt"
+file_input = "day2\\input.txt"
 #file_input = "testinput.txt"
 
 lines = ["."*140]

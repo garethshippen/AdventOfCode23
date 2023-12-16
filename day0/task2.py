@@ -1,5 +1,7 @@
+filename = "day0\\task1input.txt"
+
 lines = []
-with open("task1input.txt") as task:
+with open(filename) as task:
     lines = [line for line in task]
 
 num_words = {"one": "1",

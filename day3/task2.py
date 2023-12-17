@@ -1,5 +1,5 @@
 #filename = "day3\\testinput.txt"
-#a, b, c, d = 10, 23, 25, 50
+#a, b, c, d = 9, 23, 25, 50
 
 filename = "day3\\input.txt"
 a, b, c, d = 10, 40, 42, 118
@@ -20,6 +20,7 @@ for i in range(len(winning_nums)):
     play_nums[i] = temp_play
 
 matches = []
+cards = {}
 
 for i in range(len(winning_nums)):
     win = set(winning_nums[i])
@@ -30,4 +31,15 @@ for i in range(len(winning_nums)):
     else:
         matches.append(0)
     
-print(matches)
+for i, match in enumerate(matches):
+    cards[i] = list(range((i+1), (i+1+match)))
+
+queue = [i for i in range(len(matches))]
+
+for card in queue:
+    extra = cards[queue[card]]
+    if len(extra) > 0:
+        for thing in extra:
+            queue.append(thing)
+            
+print(len(queue))

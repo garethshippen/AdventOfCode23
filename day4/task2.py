@@ -53,6 +53,8 @@ fifth = Ranges(e2f)
 sixth = Ranges(f2g)
 seventh = Ranges(g2h)
 
+# Submitting the answer for task 1 into task 2 gives "answer too high", hence the upper limit. 
+
 def main():
     for i in range(389056265):
         if i % 1000000 == 0:

@@ -12,10 +12,8 @@ def dist(time, charge):
     return charge * (time - charge)
 
 def one_race(time, distance):
-    counter = 0
-    for i in range(time):
-        if dist(time, i) > distance:
-            counter += 1
-    return counter
-
+    opt_time = ceil(time/2)
+    var = time / 2 - (time**2 / 4 - distance)**0.5
+    return (opt_time - ceil(var))*2
+    
 print(one_race(race[0], race[1]))

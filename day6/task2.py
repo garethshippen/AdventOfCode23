@@ -6,9 +6,51 @@ class Card():
         self.hand = self.determine_hand()
         self.rank = self.make_rank()
 
+    # replace with the modal card. if there is no modal card, replace with the highest matching card
+    def improve_cards(self, cards):
+        def get_key(item): # allows sorting in rank order
+            ranks = list("AKQT98765432J")
+            priority = list(range(len(ranks)))
+            look_up = {key:value for key,value in zip(ranks, priority)}
+            return look_up[item]
+
+        def get_modal(cards): #returns the highest modal card, or None if no modal
+            cards = cards.replace("J", "")
+            count = Counter(cards)
+            freq = 2
+            modes = []
+            for pair in count.most_common():
+                if pair[1] >= freq:
+                    freq = pair[1]
+            for pair in count.most_common():
+                if pair[1] == freq:
+                    modes.append(pair[0])
+            if len(modes) > 0:
+                return sorted(modes, key = lambda x : get_key(x))[0]
+            else:
+                return None
+                
+        if "J" in cards and len(set(cards)) == 1:
+            return "AAAAA" 
+        if "J" in cards:
+            mode = get_modal(cards)
+            if mode:
+                return "".join(cards).replace("J", mode)
+            else:
+                highest = ""
+                cards = sorted(cards, key = lambda x : get_key(x))
+                for c in cards:
+                    if c != "J":
+                        highest = c
+                        break
+                return "".join(cards).replace("J", highest) 
+        else:
+            return cards
+
     def determine_hand(self):
-        count = sorted(list(Counter(self.cards).values()), reverse = True)
-        uniques = set(self.cards)        
+        cards = self.improve_cards(self.cards)
+        count = sorted(list(Counter(cards).values()), reverse = True)
+        uniques = set(cards)        
         match count[0]:
             case 5:
                 return "five"
@@ -27,7 +69,7 @@ class Card():
             case _ :
                 return "high"
     def make_rank(self):
-        sub = {'A':'z', 'K':'y', 'Q':'x', 'J':'w', 'T':'v', '9':'u', '8':'t', '7':'s', '6':'r', '5':'q', '4':'p', '3':'o', '2':'n'}
+        sub = {'A':'z', 'K':'y', 'Q':'x', 'T':'v', '9':'u', '8':'t', '7':'s', '6':'r', '5':'q', '4':'p', '3':'o', '2':'n', 'J':'m'}
         rank = ""
         for c in self.cards:
             rank += sub[c]
@@ -45,6 +87,7 @@ class Card():
 #filename = "day6\\testhands.txt"
 filename = "day6\\input.txt"
 #filename = "day6\\testinput.txt"
+
 
 card_buckets = [[],[],[],[],[],[],[]]
 
@@ -75,15 +118,8 @@ all_hands = []
 for bucket in card_buckets:
     all_hands += sorted(bucket, key=lambda x: x.get_rank())
 
-
 total = 0
 for i, hand in enumerate(all_hands):
+    #print(hand.get_cards(), i+1, hand.get_bid(), int((i+1)) * int((hand.get_bid())), sep="\t")
     total += (i+1) * int(hand.get_bid())
 print(total)
-
-'''
-for hand in all_hands:
-    if "J" in hand.get_cards():
-        counter = Counter(hand.get_cards())
-        print(hand.get_cards() + "\t" + hand.get_hand() + "\t" + str(counter["J"]))
-'''

@@ -36,12 +36,12 @@ def predict(rows):
         if i == 0:
             rows[0].append(0)
         else:
-            row.append(row[-1] + rows[i-1][-1])
+            row.insert(0, row[0] - rows[i-1][0])
     return rows
 
 def pipeline(sequence):
     l = levels(sequence)
-    return predict(l)[-1][-1]
+    return predict(l)[-1][0]
 
 filename = "day8\\input.txt"
 #filename = "day8\\testinput.txt"

@@ -64,8 +64,10 @@ def sub_vectors(next, prev):
 def invert_vec(vec):
     return tuple([-1 * i for i in vec])
 
+from collections import OrderedDict
+
 start = None
-grid = {}
+grid = OrderedDict() # Used to help Task 2
 with open(filename) as source:
     for y_axis, line in enumerate(source.readlines()):
         for x_axis in range(len(line)):
@@ -107,12 +109,19 @@ dirs = {1:(0,-1), 2:(1,0), -1:(0,1), -2:(-1,0)}
 # pick an arbitrary port in S cell, and get movement vec
 next_dir = dirs[start_cell.get_ports()[0]]
 next_cell = grid[add_vectors(start_cell.get_coords(), next_dir)]
-
+loop_cells = [start_cell.get_coords(), next_cell.get_coords()]
 counter = 1
 while next_cell.get_tile() != "S":
     counter += 1
     next_dir = next_cell.exit_vector(next_dir)
     next_cell = grid[add_vectors(next_cell.get_coords(), next_dir)]
+    loop_cells.append(next_cell.get_coords())
     
 print(counter//2)
 # 6812
+
+
+# Used for task 2
+with open("day9\\pathcoords.txt", "w") as output:
+    for coord in loop_cells:
+        output.write("{} {}{}".format(coord[0], coord[1], "\n"))

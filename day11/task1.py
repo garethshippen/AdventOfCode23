@@ -1,3 +1,6 @@
+############################################
+##              NOT FINISHED              ##  
+############################################
 filename = "day11\\input.txt"
 
 lines = []
@@ -9,6 +12,15 @@ with open(filename) as source:
         parts[1] = [int(num) for num in parts[1] if num.isdigit()]
         lines.append(parts)
 
+long = 20
+short = 10
+
+""" def recursion(parameter):
+    if base_case:
+        return concrete_value
+    else:
+        return a + recursion(parameter_minus_a) """
+
 # Generates binary numbers as a string
 def bins(n):
     i = 0
@@ -16,6 +28,8 @@ def bins(n):
         yield bin(i)[2:].zfill(n)
         i += 1
 
+
+exit()
 # generate patterns
 from collections import Counter
 def generate_patterns(springs):
@@ -40,17 +54,19 @@ def check(springs, signature):
     count = 0
     for spring in springs:
         if re.search(search, spring):
+            #print(spring)
             count += 1
     return count
 
-""" y = generate_patterns("1???1???1???01??")
-x = check(y, [5,3,1,1,1])
-print(x)  """
+y = generate_patterns("??1?1????0?11?????")
+x = check(y, [1,5,5,1])
+print(x) 
 
-total = 0
+""" total = 0
 for line in lines:
     springs = line[0]
     signature = line[1]
     total += check(generate_patterns(springs), signature)
-print(total)
+print(total) """
 #8092 too high
+#7857 answer

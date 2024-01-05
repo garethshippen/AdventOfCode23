@@ -8,6 +8,27 @@ with open(filename) as source:
 def transpose(matrix):
     return ["".join(i) for i in list(map(list,zip(*matrix)))]
 
+a = [
+["1","2","3"],
+["4","5","6"],
+["7","8","9"]
+]
+
+def print_mat(matrix):
+    for a in matrix:
+        print(a)
+
+print_mat(a)
+a = transpose(a)
+print_mat(a)
+a = transpose(a)
+print_mat(a)
+a = transpose(a)
+print_mat(a)
+a = transpose(a)
+print_mat(a)
+
+exit()
 rot = transpose(raw)
 tilted = []
 for row in rot:

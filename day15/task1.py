@@ -12,6 +12,8 @@ class Splitter(Cell):
             self.ports = [0,6]
         elif self.symbol == "-":
             self.ports = [3,9]
+    # remember if a ray has come from that direction before.
+    # if one has, do not split and redirect
 
 class Grid():
     def __init__(self, x_leng, y_leng):
@@ -102,19 +104,17 @@ class Ray():
                 self.direction = 9
             elif (self.direction == 9):
                 self.direction = 6
-        elif (instruction == "-"):
+        elif (instruction == "-"): # if ray come in from same direction before, kill ray here
             if (self.direction == 3 or self.direction == 9):
                 pass # same direction
-            elif (self.direction == 0 or self.direction == 6):
+            elif (self.direction == 0 or self.direction == 6): 
                 self.direction = 3
-                #self.grid.set_symbol(self.x, self.y, ".")
                 return Ray(grid, self.x, self.y, 9)
-        elif (instruction == "|"):
+        elif (instruction == "|"): # if ray come in from same direction before, kill ray here
             if (self.direction == "0" or self.direction == "6"):
                 pass # same direction
             elif (self.direction == 3 or self.direction == 9):
                 self.direction = 0
-                #self.grid.set_symbol(self.x, self.y, ".")
                 return Ray(grid, self.x, self.y, 6)
 
     def move(self):

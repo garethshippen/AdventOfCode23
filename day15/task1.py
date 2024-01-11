@@ -5,6 +5,14 @@ class Cell():
         self.symbol = symbol
         self.energised = False
 
+class Splitter(Cell):
+    def __init__(self):
+        super.__init__(self)
+        if self.symbol == "|":
+            self.ports = [0,6]
+        elif self.symbol == "-":
+            self.ports = [3,9]
+
 class Grid():
     def __init__(self, x_leng, y_leng):
         self.x_leng = x_leng # <--- needed?
@@ -99,14 +107,14 @@ class Ray():
                 pass # same direction
             elif (self.direction == 0 or self.direction == 6):
                 self.direction = 3
-                self.grid.set_symbol(self.x, self.y, ".")
+                #self.grid.set_symbol(self.x, self.y, ".")
                 return Ray(grid, self.x, self.y, 9)
         elif (instruction == "|"):
             if (self.direction == "0" or self.direction == "6"):
                 pass # same direction
             elif (self.direction == 3 or self.direction == 9):
                 self.direction = 0
-                self.grid.set_symbol(self.x, self.y, ".")
+                #self.grid.set_symbol(self.x, self.y, ".")
                 return Ray(grid, self.x, self.y, 6)
 
     def move(self):

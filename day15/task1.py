@@ -6,15 +6,12 @@ class Cell():
         self.energised = False
 
 class Splitter(Cell):
-    def __init__(self):
-        super.__init__(self)
-        if self.symbol == "|":
-            self.ports = [0,6]
-        elif self.symbol == "-":
-            self.ports = [3,9]
-    # remember if a ray has come from that direction before.
-    # if one has, do not split and redirect
-
+    def __init__(self, x, y, symbol):
+        super().__init__(x, y, symbol)
+        self.split = True
+    def turn_off(self):
+        self.split = False
+        
 class Grid():
     def __init__(self, x_leng, y_leng):
         self.x_leng = x_leng # <--- needed?
@@ -104,19 +101,27 @@ class Ray():
                 self.direction = 9
             elif (self.direction == 9):
                 self.direction = 6
-        elif (instruction == "-"): # if ray come in from same direction before, kill ray here
+        elif (instruction == "-"): 
             if (self.direction == 3 or self.direction == 9):
                 pass # same direction
-            elif (self.direction == 0 or self.direction == 6): 
-                self.direction = 3
-                return Ray(grid, self.x, self.y, 9)
-        elif (instruction == "|"): # if ray come in from same direction before, kill ray here
+            elif (self.direction == 0 or self.direction == 6):
+                if grid.get_cell(self.x, self.y).split:
+                    self.direction = 3
+                    grid.get_cell(self.x, self.y).turn_off()
+                    return Ray(grid, self.x, self.y, 9)
+                else:
+                    self.alive = False
+        elif (instruction == "|"): 
             if (self.direction == "0" or self.direction == "6"):
                 pass # same direction
             elif (self.direction == 3 or self.direction == 9):
-                self.direction = 0
-                return Ray(grid, self.x, self.y, 6)
-
+                if grid.get_cell(self.x, self.y).split:
+                    self.direction = 0
+                    grid.get_cell(self.x, self.y).turn_off()
+                    return Ray(grid, self.x, self.y, 6)
+                else:
+                    self.alive = False
+                    
     def move(self):
         self.shift()
         if self.alive:
@@ -138,13 +143,17 @@ def setup():
     for y in range(y_leng):
         for x in range(x_leng):
             grid.add_cell(Cell(x, y, raw[y][x]))
+            if raw[y][x] == "-" or raw[y][x] == "|":
+                grid.add_cell(Splitter(x, y, raw[y][x]))
+            else:
+                grid.add_cell(Cell(x, y, raw[y][x]))
     return grid
 grid = setup()
 
 rays = [Ray(grid)]
                 
 for ray in rays:
-    for b in range(1000):
+    for b in range(2000):
         result = ray.move()
         if result != None:
             rays.append(result)
@@ -152,9 +161,12 @@ for ray in rays:
             continue
     continue
 
-# 10717 too high at 1313 loops
 #grid.print_energised()
 print(grid.energised)
+# 6514
+
+
+
 
 """ rays = [Ray(grid)]
 for b in range(1000):
@@ -163,10 +175,8 @@ for b in range(1000):
         if result != None:
             rays.append(result)
         if not ray.alive:
-            rays.pop(i) """
-
-
-""" import os
+            rays.pop(i)
+import os
 def print_rays(rays):
     coords = []
     for ray in rays:
@@ -179,7 +189,6 @@ def print_rays(rays):
             else:
                 print(".", end="")
         print()
-
 import time
 rays = [Ray(grid)]
 for h in range(1000):
@@ -192,6 +201,4 @@ for h in range(1000):
             rays.pop(i)
         print_rays(rays)
         time.sleep(0.1)
-
-
 #grid.print_grid() """

@@ -3,14 +3,6 @@ from heapq import heappop, heapify
 
 #filename = "day16\\input.txt"
 filename = "day16\\testinput.txt"
-#filename = "day16\\testinput1.txt"
-
-def get_nei(grid, coord): # Returns the coordinates of the neighbouring nodes
-    directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
-    out_coords = []
-    for direction in directions:
-        out_coords.append((direction[0]+coord[0], direction[1]+coord[1]))
-    return out_coords
 
 # Load data and return list of lists
 def setup(filename):
@@ -39,12 +31,18 @@ open_nodes = [grid[(start)]]
 current_node = heappop(open_nodes)
 while current_node.coord != end:
     for adjacent in current_node.neighbours:
-        neighbour = grid[adjacent]
+        neighbour = grid[adjacent[0]]
         if neighbour.open:
-            open_nodes.append(neighbour)
+            if not neighbour.seen:
+                open_nodes.append(neighbour)
+                neighbour.seen = True
             new_g = current_node.g + neighbour.value
+            new_path = current_node.path + adjacent[1]
             if new_g < neighbour.g:
-                neighbour.update_g(new_g)
+                neighbour.update_g(new_g, new_path)
     current_node.close()
     current_node = heappop(open_nodes)
-print(current_node.coord, current_node.g)
+print(current_node.coord, current_node.f)
+print(current_node.path)
+# 1037 too high
+# 1032 too high

@@ -26,9 +26,9 @@ class Ranges():
                     return [self, None]
                 else:
                     pass_range = deepcopy(self)
-                    pass_range.data[attribute] = range(threshold + 1, the_range[-1])
+                    pass_range.data[attribute] = range(threshold + 1, the_range[-1]+1)
                     fail_range = deepcopy(self)
-                    fail_range.data[attribute] = range(the_range[0], threshold)
+                    fail_range.data[attribute] = range(the_range[0], threshold+1)
                     return [pass_range, fail_range]
             else:
                 return [None, self]
@@ -38,23 +38,26 @@ class Ranges():
                     return [self, None]
                 else:
                     pass_range = deepcopy(self)
-                    pass_range.data[attribute] = range(the_range[0], threshold - 1)
+                    pass_range.data[attribute] = range(the_range[0], threshold - 1 + 1)
                     fail_range = deepcopy(self)
-                    fail_range.data[attribute] = range(threshold, the_range[-1])
+                    fail_range.data[attribute] = range(threshold, the_range[-1] + 1)
                     return [pass_range, fail_range]
             else:
                 return [None, self]
         else:
             print("Wut?")
     def show(self):
-        print("x: ({},{})\nm: ({},{})\na: ({},{})\ns: ({},{})".format(self.data['x'][0], self.data['x'][1], self.data['m'][0], self.data['m'][1], self.data['a'][0], self.data['a'][1], self.data['s'][0], self.data['s'][1]))
+        print("x: ({},{})\nm: ({},{})\na: ({},{})\ns: ({},{})".format(self.data['x'][0], self.data['x'][-1], self.data['m'][0], self.data['m'][-1], self.data['a'][0], self.data['a'][-1], self.data['s'][0], self.data['s'][-1]))
 
-rng = Ranges((0,10),(0,9),(1,7),(5,10))
+rng = Ranges((5,8),(0,10),(0,10),(0,10))
 
 chops = rng.chop('x', '>', 5)
 for chop in chops:
-    chop.show()
-
+    if chop:
+        chop.show()
+    else:
+        print("None")
+    print()
 exit()
 
 

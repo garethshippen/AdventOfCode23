@@ -89,6 +89,7 @@ class Instruction():
                 return [None, rng]
         else:
             print("Wut?")
+
     
 class Workflow():
     def __init__(self, raw):
@@ -97,12 +98,13 @@ class Workflow():
         insts = self.raw.split("{")[1][:-1].split(",")
         self.instructions = [Instruction(inst) for inst in insts]
 
-    def process(self, a_range):
+    def process(self, a_range): # [(range, destination), (range, destination), ...]
         results = []
         current_range = a_range
         for instruction in self.instructions:
             if not instruction.command:
                 results.append((current_range, instruction.destination))
+                continue
             passing, failing = instruction.chop(current_range)
             if passing:
                 results.append((passing, instruction.destination))
@@ -111,15 +113,35 @@ class Workflow():
             current_range = failing
         return results
 
+""" start_range = (1,4000)
+rng = Ranges(start_range, start_range, start_range, start_range)
+
+work = Workflow("hdj{m>838:A,pv}")
+res = work.process(rng)
+print(res) """
+
+def setup(filename):
+    lines = []
+    with open(filename) as source:
+        for line in source.readlines():
+            if line == "\n":
+                break
+            lines.append(line.replace("\n", ""))
+    return lines
+
+lines = setup(filename)
+workflows = dict()
+for line in lines:
+    name = line.split("{")[0]
+    workflows[name] = Workflow(line)
+
 start_range = (1,4000)
 rng = Ranges(start_range, start_range, start_range, start_range)
 
-work = Workflow("px{a<2006:qkq,m>2090:A,rfg}")
-res = work.process(rng)
-for r in res:
-    print(r[1])
-    r[0].show()
-    print()
+to_process = deque()
+to_process.append((rng, 'in'))
+while(to_process):
+    print(to_process.popleft())
 exit()
 
 

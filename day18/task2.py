@@ -53,6 +53,8 @@ class Instruction():
             self.op = expression[1]
             self.threshold = int(expression.split(":")[0][2:])
             self.destination = expression.split(":")[1]
+        else:
+            self.destination = expression
 
 
     def chop(self, rng): #[pass range, fail range]
@@ -99,19 +101,28 @@ class Workflow():
         results = []
         current_range = a_range
         for instruction in self.instructions:
-            passing, failing = instruction.chop(current_range) # !!!!!!! Need to handle these being None
-            results.append((passing, instruction.destination))
+            if not instruction.command:
+                results.append((current_range, instruction.destination))
+            passing, failing = instruction.chop(current_range)
+            if passing:
+                results.append((passing, instruction.destination))
+            if not failing:
+                break
             current_range = failing
         return results
 
+start_range = (1,4000)
+rng = Ranges(start_range, start_range, start_range, start_range)
+
 work = Workflow("px{a<2006:qkq,m>2090:A,rfg}")
-print(work.raw)
-print(work.name)
-print(work.instructions)
+res = work.process(rng)
+for r in res:
+    print(r[1])
+    r[0].show()
+    print()
 exit()
 
-start_range = (1,4000)
-rng = Ranges(start_range, start_range, start_range, (1351, 4000))
+
 
 inst = Instruction('ppx')
 print(inst.command)

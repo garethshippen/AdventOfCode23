@@ -1,8 +1,8 @@
 from copy import deepcopy
 from collections import deque
 
-#filename = "day18/input.txt"
-filename = "day18/testinput.txt"
+filename = "day18/input.txt"
+#filename = "day18/testinput.txt"
 
 class Ranges():
     def __init__(self, x, m, a, s):
@@ -11,39 +11,11 @@ class Ranges():
                     'a':range(a[0], a[1]+1), 
                     's':range(s[0], s[1]+1)} # 'x':(0,10)
 
-    """ def chop(self, attribute, op, threshold): #[pass range, fail range]
-        the_range = self.data[attribute]
-        big_diff = threshold - the_range[-1]
-        little_diff = threshold - the_range[0]
-        if op == ">":
-            if big_diff < 0:
-                if little_diff < 0:
-                    return [self, None]
-                else:
-                    pass_range = deepcopy(self)
-                    pass_range.data[attribute] = range(threshold + 1, the_range[-1]+1)
-                    fail_range = deepcopy(self)
-                    fail_range.data[attribute] = range(the_range[0], threshold+1)
-                    return [pass_range, fail_range]
-            else:
-                return [None, self]
-        elif op == "<":
-            if little_diff > 0:
-                if big_diff > 0:
-                    return [self, None]
-                else:
-                    pass_range = deepcopy(self)
-                    pass_range.data[attribute] = range(the_range[0], threshold - 1 + 1)
-                    fail_range = deepcopy(self)
-                    fail_range.data[attribute] = range(threshold, the_range[-1] + 1)
-                    return [pass_range, fail_range]
-            else:
-                return [None, self]
-        else:
-            print("Wut?")
-            """
     def show(self):
         print("x: ({},{})\nm: ({},{})\na: ({},{})\ns: ({},{})".format(self.data['x'][0], self.data['x'][-1], self.data['m'][0], self.data['m'][-1], self.data['a'][0], self.data['a'][-1], self.data['s'][0], self.data['s'][-1]))
+
+    def combos(self):
+        return len(self.data['x']) * len(self.data['m']) * len(self.data['a']) * len(self.data['s'])
 
 class Instruction():
     def __init__(self, expression):
@@ -113,13 +85,6 @@ class Workflow():
             current_range = failing
         return results
 
-""" start_range = (1,4000)
-rng = Ranges(start_range, start_range, start_range, start_range)
-
-work = Workflow("hdj{m>838:A,pv}")
-res = work.process(rng)
-print(res) """
-
 def setup(filename):
     lines = []
     with open(filename) as source:
@@ -140,94 +105,20 @@ rng = Ranges(start_range, start_range, start_range, start_range)
 
 to_process = deque()
 to_process.append((rng, 'in'))
+
+accepted = []
 while(to_process):
-    print(to_process.popleft())
-exit()
+    current_range, instr = to_process.popleft()
+    if instr == "A":
+        accepted.append(current_range)
+        continue
+    if instr != "R":
+        workflow = workflows[instr]
+        results = workflow.process(current_range)
+        to_process.extend(results)
 
-
-
-inst = Instruction('ppx')
-print(inst.command)
-passing, failing = inst.chop(rng)
-
-if passing:
-    print("P")
-    passing.show()
-print()
-if failing:
-    print("F")
-    failing.show()
-exit()
-
-
-
-
-
-
-
-
-def get_components(a_rule):
-    return a_rule[0], a_rule[1], int(a_rule[2:])
-
-def setup(filename):
-    lines = []
-    with open(filename) as source:
-        for line in source.readlines():
-            if line == "\n":
-                break
-            lines.append(line.replace("\n", ""))
-    return lines
-
-workflows = setup(filename)
-start_range = (1,4000)
-rng = Ranges(start_range, start_range, start_range, start_range)
-
-instructions = {} # instruction name: [[condition, inst], [condition, inst], [inst]...]
-for ins in workflows:
-    name = ins.split("{")[0]
-    process = ins.split("{")[1][:-1]
-    a = []
-    for thing in process.split(","):
-        a.append(thing.split(":"))
-    instructions[name] = a
-
-""" for ins, val in instructions.items():
-    print(ins, val)
-exit() """
-
-rule = instructions['in']
-print(rule)
-exit()
-filters = deque()
-#filters.append([rng, rule]) # A list of lists of Ranges objects, and a list of commands
-filters.append([rng, ['qqz']]) # A list of lists of Ranges objects, and a list of commands
-
-#filters = [   [Range, [  ['s<1351', 'px'], ['qqz']  ]  ]   ]
-""" 
-Pass the range into the first instruction in its rule
-chop the range if needed
-the passing range gets added to filters with its new instruction
-the failing range gets passed to the next instruction in the rule
-"""
-#first_rule = filters[range/rule pair][rule in range/rule pair][nth instruction in rules][expresion or next]
-
-print(filters)
-
-head = filters.popleft()
-current_range = head[0]
-current_pair = head[1][0] # instruction/destination
-current_rule = current_pair[0] # current instruction
-pass_inst = head[1][0][1] # pass destination
-if '<' in current_rule or '>' in current_rule:
-    att, op, thresh = get_components(current_rule)
-    passing, failing = current_range.chop(att, op, thresh)
-    filters.append([passing, pass_inst])
-else:
-    filters.append([current_range, pass_inst])
-
-print(filters)
-
-""" 
-passed range put in filters queue
-failed range must go into the next instruction
-"""
+total = 0
+for a in accepted:
+    total += a.combos()
+print(total)
+# 130745440937650

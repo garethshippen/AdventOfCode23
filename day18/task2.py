@@ -1,4 +1,5 @@
 from copy import deepcopy
+from collections import deque
 
 #filename = "day18/input.txt"
 filename = "day18/testinput.txt"
@@ -10,13 +11,7 @@ class Ranges():
                     'a':range(a[0], a[1]+1), 
                     's':range(s[0], s[1]+1)} # 'x':(0,10)
 
-    def member(self, attribute, threshold):
-        if threshold in self.data[attribute]:
-            return True
-        else:
-            return False
-
-    def chop(self, attribute, op, threshold):
+    """ def chop(self, attribute, op, threshold): #[pass range, fail range]
         the_range = self.data[attribute]
         big_diff = threshold - the_range[-1]
         little_diff = threshold - the_range[0]
@@ -46,26 +41,105 @@ class Ranges():
                 return [None, self]
         else:
             print("Wut?")
+            """
     def show(self):
         print("x: ({},{})\nm: ({},{})\na: ({},{})\ns: ({},{})".format(self.data['x'][0], self.data['x'][-1], self.data['m'][0], self.data['m'][-1], self.data['a'][0], self.data['a'][-1], self.data['s'][0], self.data['s'][-1]))
 
-rng = Ranges((5,8),(0,10),(0,10),(0,10))
+class Instruction():
+    def __init__(self, expression):
+        self.command = (True if '<' in expression or '>' in expression else False)
+        if self.command:
+            self.attribute = expression[0]
+            self.op = expression[1]
+            self.threshold = int(expression.split(":")[0][2:])
+            self.destination = expression.split(":")[1]
 
-chops = rng.chop('x', '>', 5)
-for chop in chops:
-    if chop:
-        chop.show()
-    else:
-        print("None")
-    print()
+
+    def chop(self, rng): #[pass range, fail range]
+        if not self.command:
+            return [None, None]
+        the_range = rng.data[self.attribute]
+        big_diff = self.threshold - the_range[-1]
+        little_diff = self.threshold - the_range[0]
+        if self.op == ">":
+            if big_diff < 0:
+                if little_diff < 0:
+                    return [rng, None]
+                else:
+                    pass_range = deepcopy(rng)
+                    pass_range.data[self.attribute] = range(self.threshold + 1, the_range[-1]+1)
+                    fail_range = deepcopy(rng)
+                    fail_range.data[self.attribute] = range(the_range[0], self.threshold+1)
+                    return [pass_range, fail_range]
+            else:
+                return [None, rng]
+        elif self.op == "<":
+            if little_diff > 0:
+                if big_diff > 0:
+                    return [rng, None]
+                else:
+                    pass_range = deepcopy(rng)
+                    pass_range.data[self.attribute] = range(the_range[0], self.threshold - 1 + 1)
+                    fail_range = deepcopy(rng)
+                    fail_range.data[self.attribute] = range(self.threshold, the_range[-1] + 1)
+                    return [pass_range, fail_range]
+            else:
+                return [None, rng]
+        else:
+            print("Wut?")
+    
+class Workflow():
+    def __init__(self, raw):
+        self.raw = raw
+        self.name = self.raw.split("{")[0]
+        insts = self.raw.split("{")[1][:-1].split(",")
+        self.instructions = [Instruction(inst) for inst in insts]
+
+    def process(self, a_range):
+        results = []
+        current_range = a_range
+        for instruction in self.instructions:
+            passing, failing = instruction.chop(current_range) # !!!!!!! Need to handle these being None
+            results.append((passing, instruction.destination))
+            current_range = failing
+        return results
+
+work = Workflow("px{a<2006:qkq,m>2090:A,rfg}")
+print(work.raw)
+print(work.name)
+print(work.instructions)
+exit()
+
+start_range = (1,4000)
+rng = Ranges(start_range, start_range, start_range, (1351, 4000))
+
+inst = Instruction('ppx')
+print(inst.command)
+passing, failing = inst.chop(rng)
+
+if passing:
+    print("P")
+    passing.show()
+print()
+if failing:
+    print("F")
+    failing.show()
 exit()
 
 
+
+
+
+
+
+
+def get_components(a_rule):
+    return a_rule[0], a_rule[1], int(a_rule[2:])
+
 def setup(filename):
     lines = []
-    index = None
     with open(filename) as source:
-        for i, line in enumerate(source.readlines()):
+        for line in source.readlines():
             if line == "\n":
                 break
             lines.append(line.replace("\n", ""))
@@ -73,137 +147,54 @@ def setup(filename):
 
 workflows = setup(filename)
 start_range = (1,4000)
-start = Ranges(start_range, start_range, start_range, start_range)
+rng = Ranges(start_range, start_range, start_range, start_range)
 
-instructions = {}
+instructions = {} # instruction name: [[condition, inst], [condition, inst], [inst]...]
 for ins in workflows:
     name = ins.split("{")[0]
     process = ins.split("{")[1][:-1]
-    instructions[name] = process.split(",")
+    a = []
+    for thing in process.split(","):
+        a.append(thing.split(":"))
+    instructions[name] = a
 
 """ for ins, val in instructions.items():
-    print(ins, val) """
+    print(ins, val)
+exit() """
 
-# Make a network of nodes
-# Each node is an instruction
-# Node receives a list of four ranges
-# The node chops the ranges based on its rules, and forwards the ranges to other nodes
-# Ranges that arrive at the A node are calculated.
-
-class Instruction():
-    def __init__(self, raw_instruction):
-        self.parse(raw_instruction)
-        #self.len
-        #self.next_node
-        #self.attribute
-        #self.op
-        #self.threshold
-        
-    def parse(self, raw):
-        if ":" in raw:
-            temp = raw.split(":")
-            self.next_node = temp[1]
-            self.attribute = raw[0]
-            self.op = raw[1]
-            self.threshold = temp[0][2:]
-            self.len = 4
-        else:
-            self.next_node = raw
-            self.len = 1
-
-    def chop(self, a_range): 
-    # In: a range
-    # Out: a range that passes this instruction, a range that fails this instruction
-        # Range pass
-        test_range = a_range.data[self.attribute]
-        low = test_range[0]
-        high = test_range[1]
-        # 1 - 4000
-        # s < 1234
-        # True: 1 - 1233
-        # False: 1234 - 4000
-        
-        # 1 - 4000
-        # s > 345
-        # True: 346 - 4000
-        # False: 1 - 345
-                
-        if len(self) == 1:
-            return self
-        
-    def __len__(self): return self.len
-            
-""" inst = Instruction('m>2306:qkq')
-print(len(inst)) """
-
-class Node():
-    def __init__(self, workflow):
-        self.name = workflow.split("{")[0]
-        self.instructions = self.gen_instructions(workflow.split("{")[1][:-1].split(","))
-    def gen_instructions(self, raw_instructions):
-        instructions = []
-        for inst in raw_instructions:
-            instructions.append(Instruction(inst))
-        return instructions
-    
-    #Receive a range
-    #Give range to each instruction in order
-    #Ranges that don't 
-
-node = Node(workflows[0])
-print(node.instructions)
-
+rule = instructions['in']
+print(rule)
 exit()
-class Node():
-    def __init__(self, name, instructions):
-        self.name = name
-        self.instructions = instructions
-    
-    def parse_instruction(self, instruction): # Returns a tokenised form of the instruction, or the next instruction.
-        if ">" in instruction or "<" in instruction:
-            attribute = instruction[0]
-            comparitor = instruction[1]
-            result_index = instruction.index(":")
-            comparison = instruction[2:result_index]
-            result = instruction[result_index+1:]
-            return [attribute, comparitor, comparison, result]
-        else: # No comparison, just instruction
-            return [instruction]
-        
-    def process_instruction(self, instruction, item):
-        if len(instruction) == 1:
-            return instruction[0]
-        attribute = item.get_attribute(instruction[0])
-        comparitor = instruction[1]
-        comparison = int(instruction[2])
-        result = instruction[3]
-        
-        if comparitor == "<":
-            if attribute < comparison:
-                return result
-        elif comparitor == ">":
-            if attribute > comparison:
-                return result
-        return False
-    
-    def process(self, range):
-        pass
-    
-    
-    
-""" class Item():
-    def __init__(self, body):
-        self.x = int(body[0][2:])
-        self.m = int(body[1][2:])
-        self.a = int(body[2][2:])
-        self.s = int(body[3][2:])
-        self.sum = self.x + self.m + self.a + self.s
-    def get_attribute(self, letter):
-        if letter == 'x':
-            return self.x
-        elif letter == 'm':
-            return self.m
-        elif letter == 'a':
-            return self.a
-        elif letter == 's':
-            return self.s """
+filters = deque()
+#filters.append([rng, rule]) # A list of lists of Ranges objects, and a list of commands
+filters.append([rng, ['qqz']]) # A list of lists of Ranges objects, and a list of commands
+
+#filters = [   [Range, [  ['s<1351', 'px'], ['qqz']  ]  ]   ]
+""" 
+Pass the range into the first instruction in its rule
+chop the range if needed
+the passing range gets added to filters with its new instruction
+the failing range gets passed to the next instruction in the rule
+"""
+#first_rule = filters[range/rule pair][rule in range/rule pair][nth instruction in rules][expresion or next]
+
+print(filters)
+
+head = filters.popleft()
+current_range = head[0]
+current_pair = head[1][0] # instruction/destination
+current_rule = current_pair[0] # current instruction
+pass_inst = head[1][0][1] # pass destination
+if '<' in current_rule or '>' in current_rule:
+    att, op, thresh = get_components(current_rule)
+    passing, failing = current_range.chop(att, op, thresh)
+    filters.append([passing, pass_inst])
+else:
+    filters.append([current_range, pass_inst])
+
+print(filters)
+
+""" 
+passed range put in filters queue
+failed range must go into the next instruction
+"""

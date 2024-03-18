@@ -9,7 +9,10 @@ class FlipFlop():
             self.state *= signal
             for destination in self.output:
                 out.append((destination, self.state))
-        return out  
+        return out
+    
+    def reset(self):
+        self.state = -1
 
 
 class Conjunction():
@@ -29,3 +32,6 @@ class Conjunction():
         for destination in self.output:
             out.append((destination, out_signal))
         return out
+    
+    def reset(self):
+        self.states = {}
